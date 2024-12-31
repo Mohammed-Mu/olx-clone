@@ -1,50 +1,87 @@
-import React, { Fragment } from 'react';
+import React, { useState, useContext } from 'react';
 import './Create.css';
 import Header from '../Header/Header';
+import {useHistory} from 'react-router-dom'
+import { FirebaseContext } from '../../store/Context';
 
 const Create = () => {
+  const { firebase } = useContext(FirebaseContext); // Access the Firebase instance
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [price, setPrice] = useState('');
+  const [image, setImage] = useState(null); // Stores the selected image file
+  const date = new Date();
+  const history = useHistory()
+
+  const handleSubmit = () => {
+    // Create a Firestore document with the form data
+    firebase
+      .firestore()
+      .collection('products') // Replace 'products' with your desired Firestore collection name
+      .add({
+        name,
+        category,
+        price,
+        createdAt: date.toDateString(),
+      })
+      history.push('/')
+    };
+
   return (
-    <Fragment>
+    <div>
       <Header />
-      <card>
-        <div className="centerDiv">
-          <form>
-            <label htmlFor="fname">Name</label>
-            <br />
-            <input
-              className="input"
-              type="text"
-              id="fname"
-              name="Name"
-              defaultValue="John"
-            />
-            <br />
-            <label htmlFor="fname">Category</label>
-            <br />
-            <input
-              className="input"
-              type="text"
-              id="fname"
-              name="category"
-              defaultValue="John"
-            />
-            <br />
-            <label htmlFor="fname">Price</label>
-            <br />
-            <input className="input" type="number" id="fname" name="Price" />
-            <br />
-          </form>
-          <br />
-          <img alt="Posts" width="200px" height="200px" src=""></img>
-          <form>
-            <br />
-            <input type="file" />
-            <br />
-            <button className="uploadBtn">upload and Submit</button>
-          </form>
-        </div>
-      </card>
-    </Fragment>
+      <div className="centerDiv">
+        <label htmlFor="name">Name</label>
+        <br />
+        <input
+          className="input"
+          type="text"
+          value={name}
+          id="name"
+          onChange={(e) => setName(e.target.value)}
+          name="Name"
+        />
+        <br />
+        <label htmlFor="category">Category</label>
+        <br />
+        <input
+          className="input"
+          type="text"
+          value={category}
+          id="category"
+          onChange={(e) => setCategory(e.target.value)}
+          name="Category"
+        />
+        <br />
+        <label htmlFor="price">Price</label>
+        <br />
+        <input
+          className="input"
+          type="number"
+          value={price}
+          id="price"
+          onChange={(e) => setPrice(e.target.value)}
+          name="Price"
+        />
+        <br />
+        <br />
+        <img
+          alt="Preview"
+          width="200px"
+          height="200px"
+          src={image ? URL.createObjectURL(image) : ''}
+        />
+        <br />
+        <input
+          type="file"
+          onChange={(e) => setImage(e.target.files[0])}
+        />
+        <br />
+        <button onClick={handleSubmit} className="uploadBtn">
+          Submit
+        </button>
+      </div>
+    </div>
   );
 };
 

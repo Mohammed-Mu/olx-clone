@@ -1,52 +1,71 @@
-import React,{useState,useContext} from 'react';
-import { FirebaseContext } from '../../store/FireBaseContext';
-import Logo from '../../olx-logo.png';
-import './Login.css';
+import React, { useState, useContext } from "react";
+import { FirebaseContext } from "../../store/Context";
+import Logo from "../../olx-logo.png";
+import "./Login.css";
+import { useHistory } from "react-router-dom";
 
 function Login() {
-  const [email,setEmail] = useState('')
-  const [password,setPassword] = useState('')
-  const {firebase} = useContext(FirebaseContext)
-  const handleLogin = (e)=>{
-    e.perventDefault()
-    firebase.auth().signInWithEmailAndPassword(email,password).then(()=>{
-      alert('Logged In')
-    }).catch((error)=>{
-      alert(error.message)
-    })
-    
-  }
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(""); // For error messages
+  const [loading, setLoading] = useState(false); // Loading state
+  const { firebase } = useContext(FirebaseContext);
+  const history = useHistory()
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setLoading(true); // Start loading
+    setError(""); // Clear previous error
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(() => {
+        history.push('/')
+      })
+      .catch((error) => {
+        setError(error.message);
+        setLoading(false); // Stop loading
+      });
+  };
+
   return (
     <div>
       <div className="loginParentDiv">
-        <img width="200px" height="200px" src={Logo}></img>
+        <img width="200px" height="200px" src={Logo} alt="Logo" />
         <form onSubmit={handleLogin}>
-          <label htmlFor="fname">Email</label>
+          <label htmlFor="email">Email</label>
           <br />
           <input
             className="input"
             type="email"
-            id="fname"
-            onChange={(e)=> setEmail(e.target.value)}
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             name="email"
-            defaultValue="John"
+            placeholder="Enter your email"
+            required
           />
           <br />
-          <label htmlFor="lname">Password</label>
+          <label htmlFor="password">Password</label>
           <br />
           <input
             className="input"
             type="password"
-            id="lname"
+            id="password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
             name="password"
-            defaultValue="Doe"
+            placeholder="Enter your password"
+            required
           />
           <br />
           <br />
-          <button>Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
-        <a>Signup</a>
+        {error && <p className="errorMessage">{error}</p>}
+        <a href="/signup">Signup</a>
       </div>
     </div>
   );
